@@ -70,7 +70,7 @@ func IsPagedFile(info os.FileInfo, fileName string) bool {
 	if info.IsDir() ||
 		strings.HasSuffix(fileName, "_fsm") ||
 		strings.HasSuffix(fileName, "_vm") ||
-		((!strings.Contains(fileName, "base")) && (!strings.Contains(fileName, "global")) && (!strings.Contains(fileName, "pg_tblspc"))) ||
+		((!strings.Contains(fileName, "base")) && (!strings.Contains(fileName, "global"))) ||
 		info.Size() == 0 ||
 		info.Size()%int64(BlockSize) != 0 {
 		return false

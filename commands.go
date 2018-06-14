@@ -23,8 +23,12 @@ import (
 
 // walk recursively descends path, calling walkFn.
 func walk(path string, info os.FileInfo, walkFn filepath.WalkFunc) error {
-	if !info.IsDir() {
+	if !info.IsDir() && info.Mode() & os.ModeSymlink == 0 {
 		return walkFn(path, info, nil)
+	}
+
+	if info.Mode() & os.ModeSymlink != 0 {
+		path, _ = filepath.EvalSymlinks(path)
 	}
 
 	names, err := readDirNames(path)
@@ -68,10 +72,11 @@ func walk(path string, info os.FileInfo, walkFn filepath.WalkFunc) error {
 func Walk(root string, walkFn filepath.WalkFunc) error {
 	info, err := os.Lstat(root)
 	if info.Mode() & os.ModeSymlink != 0 {
-		symlinkPath, _ := os.Readlink(info.Name())
+		symlinkPath, _ := filepath.EvalSymlinks(root)
 		info, err = os.Lstat(symlinkPath)
 	}
 	if err != nil {
+		println(err.Error())
 		err = walkFn(root, nil, err)
 	} else {
 		err = walk(root, info, walkFn)
